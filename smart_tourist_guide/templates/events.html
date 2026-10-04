@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cultural Festivals & Events - Smart Tourist Guide</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="/" class="brand-logo">
+        <div class="brand-icon">🧭</div>
+        <span>Smart Tourist Guide</span>
+      </a>
+
+      <button class="nav-toggle-btn" aria-label="Toggle Navigation">☰</button>
+
+      <ul class="nav-menu">
+        <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+        <li><a href="/explore" class="nav-link">Explore</a></li>
+        <li><a href="/map" class="nav-link">Map</a></li>
+        <li><a href="/trip-planner" class="nav-link">AI Planner</a></li>
+        <li><a href="/events" class="nav-link active">Events</a></li>
+        <li><a href="/emergency" class="nav-link" style="color: #dc2626; font-weight: 600;">Emergency 🚨</a></li>
+      </ul>
+
+      <div class="nav-actions" id="nav-auth-actions"></div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+
+      <div style="margin-bottom: 2.5rem;">
+        <div class="section-kicker">Cultural Celebrations</div>
+        <h1 class="section-title" style="font-size: 2.25rem;">Tourism & Cultural Events</h1>
+        <p class="section-subtitle">
+          Immerse yourself in centuries-old temple festivals, heritage dance recitals, and seasonal hill fairs.
+        </p>
+      </div>
+
+      <div class="cards-grid" id="events-grid">
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+          <p style="color: var(--text-muted);">Fetching seasonal festivals...</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 Smart Tourist Guide. All rights reserved.</div>
+        <div style="color: #64748b;">Event dates follow cultural calendar schedules.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const res = await fetch('/api/events');
+        const data = await res.json();
+        const events = data.events || [];
+        const container = document.getElementById('events-grid');
+
+        if (events.length === 0) {
+          container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">No active events right now.</div>`;
+          return;
+        }
+
+        container.innerHTML = events.map(ev => `
+          <div class="place-card">
+            <div class="card-media">
+              <img src="${ev.image_url}" alt="${ev.name}">
+            </div>
+            <div class="card-body">
+              <div class="card-meta">
+                <span style="font-weight: 700; color: var(--primary); font-size: 0.8125rem;">📅 ${ev.date}</span>
+                <span>·</span>
+                <span style="color: var(--text-muted); font-size: 0.8125rem;">📍 ${ev.location}</span>
+              </div>
+              <h3 class="card-title">${ev.name}</h3>
+              <p class="card-desc">${ev.description}</p>
+              <div class="card-footer">
+                <span style="font-size: 0.8125rem; color: #b45309; font-weight: 600;">✨ Public Festival</span>
+                <button onclick="addToTrip('${ev.name}', '${ev.location}')" class="btn btn-sm btn-primary">
+                  Add to My Trip +
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        document.getElementById('events-grid').innerHTML = `<p style="padding: 2rem;">Could not load events.</p>`;
+      }
+    });
+
+    function addToTrip(name, loc) {
+      const user = Auth.requireAuth();
+      if (!user) return;
+      App.toast(`Added "${name}" to your trip wishlist!`, 'success');
+      setTimeout(() => {
+        window.location.href = `/trip-planner?add=${encodeURIComponent(name)}`;
+      }, 900);
+    }
+  </script>
+</body>
+</html>

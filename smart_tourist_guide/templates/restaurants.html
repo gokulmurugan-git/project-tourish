@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Food & Restaurants - Smart Tourist Guide</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="/" class="brand-logo">
+        <div class="brand-icon">🧭</div>
+        <span>Smart Tourist Guide</span>
+      </a>
+
+      <button class="nav-toggle-btn" aria-label="Toggle Navigation">☰</button>
+
+      <ul class="nav-menu">
+        <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+        <li><a href="/explore" class="nav-link">Explore</a></li>
+        <li><a href="/map" class="nav-link">Map</a></li>
+        <li><a href="/trip-planner" class="nav-link">AI Planner</a></li>
+        <li><a href="/hotels" class="nav-link">Hotels</a></li>
+        <li><a href="/restaurants" class="nav-link active">Restaurants</a></li>
+        <li><a href="/emergency" class="nav-link" style="color: #dc2626; font-weight: 600;">Emergency 🚨</a></li>
+      </ul>
+
+      <div class="nav-actions" id="nav-auth-actions"></div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+
+      <!-- Header & Filters -->
+      <div style="margin-bottom: 2rem;">
+        <div class="section-kicker">Authentic Flavors</div>
+        <h1 class="section-title" style="font-size: 2.25rem;">Restaurants & Culinary Highlights</h1>
+        <p class="section-subtitle">
+          Taste iconic traditional vegetarian feasts, authentic Chettinad spices, Madurai Jigarthanda, and coastal seafood.
+        </p>
+
+        <!-- Filter Controls -->
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+          <input type="text" id="rest-search" class="form-control" placeholder="Search by restaurant name, food, or dish..." style="flex: 1; min-width: 240px;">
+
+          <select id="rest-cuisine-filter" class="form-control" style="width: 190px;">
+            <option value="all">All Cuisines</option>
+            <option value="South Indian">Traditional South Indian</option>
+            <option value="Chettinad">Chettinad Spicy</option>
+            <option value="Dessert">Desserts & Jigarthanda</option>
+            <option value="Multi-Cuisine">Multi-Cuisine & Cafe</option>
+          </select>
+
+          <select id="rest-budget-filter" class="form-control" style="width: 160px;">
+            <option value="all">All Budgets</option>
+            <option value="₹">Budget (₹)</option>
+            <option value="₹₹">Moderate (₹₹)</option>
+            <option value="₹₹₹">Fine Dining (₹₹₹)</option>
+          </select>
+
+          <button onclick="App.requestLocation(() => RestaurantsPage.render())" class="btn btn-secondary">
+            📍 Near Me
+          </button>
+        </div>
+      </div>
+
+      <!-- Restaurants Grid -->
+      <div class="cards-grid" id="restaurants-grid">
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+          <p style="color: var(--text-muted);">Discovering authentic dining spots...</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 Smart Tourist Guide. All rights reserved.</div>
+        <div style="color: #64748b;">Hygiene ratings and dining recommendations compiled with local traveler consensus.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script>
+    const RestaurantsPage = {
+      restaurants: [],
+
+      async init() {
+        try {
+          const res = await fetch('/api/restaurants');
+          const data = await res.json();
+          this.restaurants = data.restaurants || [];
+          this.setupListeners();
+          this.render();
+        } catch (e) {
+          document.getElementById('restaurants-grid').innerHTML = `<p style="padding: 2rem;">Could not load restaurants.</p>`;
+        }
+      },
+
+      setupListeners() {
+        document.getElementById('rest-search').addEventListener('input', () => this.render());
+        document.getElementById('rest-cuisine-filter').addEventListener('change', () => this.render());
+        document.getElementById('rest-budget-filter').addEventListener('change', () => this.render());
+      },
+
+      render() {
+        const query = document.getElementById('rest-search').value.toLowerCase().trim();
+        const cuisine = document.getElementById('rest-cuisine-filter').value;
+        const budget = document.getElementById('rest-budget-filter').value;
+
+        let filtered = this.restaurants.filter(r => {
+          const matchesQuery = !query || r.name.toLowerCase().includes(query) || (r.cuisine && r.cuisine.toLowerCase().includes(query));
+          const matchesCuisine = cuisine === 'all' || (r.cuisine && r.cuisine.toLowerCase().includes(cuisine.toLowerCase()));
+          const matchesBudget = budget === 'all' || (r.price_range && r.price_range === budget);
+          return matchesQuery && matchesCuisine && matchesBudget;
+        });
+
+        const container = document.getElementById('restaurants-grid');
+        if (filtered.length === 0) {
+          container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 3rem; background: white; border-radius: var(--radius-lg);">No restaurants match your filter.</div>`;
+          return;
+        }
+
+        container.innerHTML = filtered.map(r => {
+          let distText = '';
+          if (App.userLocation && r.latitude && r.longitude) {
+            const d = App.calculateDistance(App.userLocation.lat, App.userLocation.lng, r.latitude, r.longitude);
+            if (d) distText = `${d} km away`;
+          }
+
+          const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${r.latitude},${r.longitude}`;
+
+          return `
+            <div class="place-card">
+              <div class="card-media">
+                <img src="${r.image_url}" alt="${r.name}">
+              </div>
+              <div class="card-body">
+                <div class="card-meta">
+                  <span style="font-weight: 700; color: #ea580c; font-size: 0.8125rem;">${r.cuisine}</span>
+                  <span>·</span>
+                  <span class="card-rating">★ ${r.rating.toFixed(1)}</span>
+                  <span>·</span>
+                  <span style="color: #059669; font-weight: 600;">${r.price_range}</span>
+                </div>
+                <h3 class="card-title">${r.name}</h3>
+                <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.5rem;">📍 ${r.location}</p>
+                <p class="card-desc" style="-webkit-line-clamp: 2;">Specialties: ${r.specialty || 'Traditional dishes & local hospitality'}</p>
+                <div class="card-footer">
+                  <span class="card-distance">${distText || '📍 Central'}</span>
+                  <a href="${dirUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">
+                    Directions ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => RestaurantsPage.init());
+  </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Map - Smart Tourist Guide</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="/" class="brand-logo">
+        <div class="brand-icon">🧭</div>
+        <span>Smart Tourist Guide</span>
+      </a>
+
+      <button class="nav-toggle-btn" aria-label="Toggle Navigation">☰</button>
+
+      <ul class="nav-menu">
+        <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+        <li><a href="/explore" class="nav-link">Explore</a></li>
+        <li><a href="/map" class="nav-link active">Interactive Map</a></li>
+        <li><a href="/trip-planner" class="nav-link">AI Planner</a></li>
+        <li><a href="/hotels" class="nav-link">Hotels</a></li>
+        <li><a href="/restaurants" class="nav-link">Restaurants</a></li>
+        <li><a href="/emergency" class="nav-link" style="color: #dc2626; font-weight: 600;">Emergency 🚨</a></li>
+      </ul>
+
+      <div class="nav-actions" id="nav-auth-actions"></div>
+    </div>
+  </header>
+
+  <main class="main-content" style="padding-bottom: 2rem;">
+    <div class="container">
+
+      <!-- Map Page Header & Category Buttons -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h1 style="font-size: 1.875rem; font-weight: 800; color: var(--secondary);">Interactive Tourism Map</h1>
+          <p style="color: var(--text-muted); font-size: 0.875rem;">View attractions, restaurants, accommodations, and emergency facilities.</p>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="filter-tab map-filter-btn active" data-filter="all">🌐 All Layers</button>
+          <button class="filter-tab map-filter-btn" data-filter="places">🏛️ Attractions</button>
+          <button class="filter-tab map-filter-btn" data-filter="restaurants">🍽️ Restaurants</button>
+          <button class="filter-tab map-filter-btn" data-filter="hotels">🏨 Hotels</button>
+          <button class="filter-tab map-filter-btn" data-filter="emergency" style="color: #dc2626; font-weight: 600;">🚨 Emergency</button>
+          <button onclick="TourismMap.locateUser()" class="btn btn-sm btn-primary" title="Re-center on my live GPS location">
+            📍 My Location
+          </button>
+        </div>
+      </div>
+
+      <!-- Map & Sidebar Split Layout -->
+      <div class="map-layout">
+        <!-- Sidebar List -->
+        <div class="map-sidebar">
+          <div class="map-sidebar-head">
+            <h3 style="font-size: 1rem; font-weight: 700; color: var(--secondary);">Points of Interest</h3>
+            <p style="font-size: 0.75rem; color: var(--text-muted);">Click any card to center map</p>
+          </div>
+          <div class="map-items-list" id="map-sidebar-items">
+            <div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.875rem;">
+              Loading locations...
+            </div>
+          </div>
+        </div>
+
+        <!-- Map Canvas -->
+        <div class="map-canvas-container">
+          <div id="map-view"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer" style="margin-top: 2rem;">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 Smart Tourist Guide. OpenStreetMap & Leaflet Geolocation Enabled.</div>
+        <div style="color: #64748b;">Click "Get Directions" on any pin for turn-by-turn navigation.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/map.js"></script>
+</body>
+</html>

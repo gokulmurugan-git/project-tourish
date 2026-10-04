@@ -1,0 +1,8 @@
+{
+  "name": "Smart Tourist Guide",
+  "description": "AI-powered travel companion for discovering places, planning trips, and exploring destinations.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

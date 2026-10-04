@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore Places - Smart Tourist Guide</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="/" class="brand-logo">
+        <div class="brand-icon">🧭</div>
+        <span>Smart Tourist Guide</span>
+      </a>
+
+      <button class="nav-toggle-btn" aria-label="Toggle Navigation">☰</button>
+
+      <ul class="nav-menu">
+        <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+        <li><a href="/explore" class="nav-link active">Explore</a></li>
+        <li><a href="/map" class="nav-link">Map</a></li>
+        <li><a href="/trip-planner" class="nav-link">AI Planner</a></li>
+        <li><a href="/ai-assistant" class="nav-link">AI Assistant</a></li>
+        <li><a href="/hotels" class="nav-link">Hotels</a></li>
+        <li><a href="/restaurants" class="nav-link">Restaurants</a></li>
+        <li><a href="/events" class="nav-link">Events</a></li>
+        <li><a href="/emergency" class="nav-link" style="color: #dc2626; font-weight: 600;">Emergency 🚨</a></li>
+      </ul>
+
+      <div class="nav-actions" id="nav-auth-actions"></div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+
+      <!-- Header & Search Controls -->
+      <div style="margin-bottom: 2rem;">
+        <div class="section-kicker">Discover Destinations</div>
+        <h1 class="section-title" style="font-size: 2.25rem;">Explore Tourist Attractions</h1>
+        <p class="section-subtitle">Find heritage monuments, serene beaches, hill retreats, and cultural wonders.</p>
+        
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 280px; position: relative;">
+            <input type="text" id="explore-search" class="form-control" placeholder="Search by name, city, temple, beach, or landmark..." style="padding-left: 2.5rem; height: 46px; font-size: 0.9375rem;">
+            <span style="position: absolute; left: 1rem; top: 12px; font-size: 1.1rem; color: #94a3b8;">🔍</span>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <button onclick="App.requestLocation(() => Explore.render())" class="btn btn-secondary" style="height: 46px;" title="Use my current GPS location">
+              <span>📍</span> Near Me
+            </button>
+
+            <select id="explore-sort" class="form-control" style="height: 46px; width: 170px;">
+              <option value="rating">Top Rated ★</option>
+              <option value="name">Alphabetical</option>
+              <option value="distance">Nearest Distance</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories Filter Tabs -->
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-category="All">All Places</button>
+        <button class="filter-tab" data-category="Historical">🏛️ Historical</button>
+        <button class="filter-tab" data-category="Nature">🌲 Nature & Hills</button>
+        <button class="filter-tab" data-category="Beach">🏖️ Beach</button>
+        <button class="filter-tab" data-category="Adventure">🧗 Adventure</button>
+        <button class="filter-tab" data-category="Religious">🛕 Religious</button>
+        <button class="filter-tab" data-category="Shopping">🛍️ Shopping</button>
+        <button class="filter-tab" data-category="Food">🍲 Food & Dining</button>
+        <button class="filter-tab" data-category="Culture">🎭 Culture</button>
+        <button class="filter-tab" data-category="Entertainment">🎡 Entertainment</button>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin: 1.5rem 0 1rem; font-size: 0.875rem; color: var(--text-muted);">
+        <span id="explore-count">Loading places...</span>
+        <span class="user-location-badge" style="font-size: 0.8125rem; color: var(--primary); font-weight: 500;"></span>
+      </div>
+
+      <!-- Places Cards Grid -->
+      <div class="cards-grid" id="explore-grid">
+        <!-- Rendered via explore.js -->
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 Smart Tourist Guide. All rights reserved.</div>
+        <div style="color: #64748b;">All places verified by local tourism authorities.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/explore.js"></script>
+  <script>
+    // Check URL parameters for pre-selected category
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const cat = params.get('category');
+      if (cat) {
+        const tabs = document.querySelectorAll('.filter-tab');
+        tabs.forEach(t => {
+          if (t.dataset.category && t.dataset.category.toLowerCase() === cat.toLowerCase()) {
+            t.click();
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

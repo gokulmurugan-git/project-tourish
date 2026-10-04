@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Saved Trips - Smart Tourist Guide</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="/" class="brand-logo">
+        <div class="brand-icon">🧭</div>
+        <span>Smart Tourist Guide</span>
+      </a>
+
+      <button class="nav-toggle-btn" aria-label="Toggle Navigation">☰</button>
+
+      <ul class="nav-menu">
+        <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+        <li><a href="/explore" class="nav-link">Explore</a></li>
+        <li><a href="/map" class="nav-link">Map</a></li>
+        <li><a href="/trip-planner" class="nav-link">AI Planner</a></li>
+        <li><a href="/my-trips" class="nav-link active">My Trips</a></li>
+        <li><a href="/favorites" class="nav-link">Favorites</a></li>
+        <li><a href="/emergency" class="nav-link" style="color: #dc2626; font-weight: 600;">Emergency 🚨</a></li>
+      </ul>
+
+      <div class="nav-actions" id="nav-auth-actions"></div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+
+      <div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <div class="section-kicker">Travel History</div>
+          <h1 class="section-title" style="font-size: 2.25rem;">My Saved Trips & Itineraries</h1>
+          <p class="section-subtitle">Access your customized AI trip schedules, daily activities, and dining notes.</p>
+        </div>
+        <a href="/trip-planner" class="btn btn-primary">Plan New Trip ⚡</a>
+      </div>
+
+      <div id="trips-container" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div style="text-align: center; padding: 4rem;">
+          <p style="color: var(--text-muted);">Loading your itineraries...</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Modal for viewing full trip timeline -->
+  <div id="trip-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; padding: 1.5rem; backdrop-filter: blur(4px);">
+    <div style="background: white; border-radius: var(--radius-xl); max-width: 720px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-xl); padding: 2rem; position: relative;">
+      <button onclick="closeTripModal()" style="position: absolute; top: 1.25rem; right: 1.25rem; background: var(--bg-card-alt); border: none; width: 34px; height: 34px; border-radius: 50%; font-size: 1.1rem; cursor: pointer;">✕</button>
+      <div id="trip-modal-content"></div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 Smart Tourist Guide. All rights reserved.</div>
+        <div style="color: #64748b;">Itineraries can be printed or exported for offline access.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script>
+    let userTrips = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = Auth.requireAuth();
+      if (!user) return;
+      loadTrips(user);
+    });
+
+    async function loadTrips(user) {
+      const container = document.getElementById('trips-container');
+      try {
+        const res = await fetch(`/api/trips?user_id=${user.user_id}`);
+        const data = await res.json();
+        userTrips = data.trips || [];
+
+        if (userTrips.length === 0) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 4.5rem 1.5rem; background: white; border-radius: var(--radius-xl); border: 1px dashed var(--border-light);">
+              <div style="font-size: 3rem; margin-bottom: 0.75rem;">🗺️</div>
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--secondary);">No trips saved yet</h3>
+              <p style="color: var(--text-muted); font-size: 0.9375rem; margin: 0.5rem 0 1.5rem;">Use our AI Trip Planner to generate a custom itinerary and save it to your profile.</p>
+              <a href="/trip-planner" class="btn btn-primary">Generate a Trip with AI ⚡</a>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = userTrips.map(t => `
+          <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-xl); padding: 1.75rem; box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+            <div style="flex: 1; min-width: 260px;">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <span style="font-size: 0.8125rem; font-weight: 700; color: var(--primary); text-transform: uppercase;">${t.duration || '2 Days'}</span>
+                <span style="color: var(--text-muted);">·</span>
+                <span style="font-size: 0.8125rem; color: #059669; font-weight: 600;">Budget: ${t.budget || 'Flexible'}</span>
+                <span style="color: var(--text-muted);">·</span>
+                <span style="font-size: 0.8125rem; color: var(--text-muted);">📅 Created: ${t.created_at || 'Recently'}</span>
+              </div>
+              <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--secondary); margin-bottom: 0.375rem;">
+                Trip to ${t.destination}
+              </h2>
+              <p style="font-size: 0.875rem; color: var(--text-muted);">
+                <b>Focus:</b> ${t.interests || 'Culture & Sights'} · <b>Style:</b> ${t.travel_style || 'Balanced'}
+              </p>
+            </div>
+
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+              <button onclick="viewTripDetails('${t.trip_id}')" class="btn btn-primary">
+                View Trip 👁️
+              </button>
+              <button onclick="deleteTrip('${t.trip_id}')" class="btn btn-danger" title="Delete Trip">
+                Delete Trip 🗑️
+              </button>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (e) {
+        container.innerHTML = `<p style="padding: 2rem;">Could not load trips.</p>`;
+      }
+    }
+
+    function viewTripDetails(tripId) {
+      const trip = userTrips.find(t => t.trip_id === tripId);
+      if (!trip) return;
+
+      const modal = document.getElementById('trip-modal');
+      const content = document.getElementById('trip-modal-content');
+
+      let daysHtml = '';
+      if (trip.itinerary && trip.itinerary.days) {
+        daysHtml = trip.itinerary.days.map((d, i) => `
+          <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-light);">
+            <h4 style="font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem;">Day ${i+1}: ${d.theme || ''}</h4>
+            <div>
+              ${(d.activities || []).map(a => `
+                <div style="margin-bottom: 0.75rem;">
+                  <div style="font-weight: 600; font-size: 0.9375rem; color: var(--secondary);">🕒 ${a.time} - ${a.title}</div>
+                  <div style="font-size: 0.875rem; color: var(--text-muted);">${a.description}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `).join('');
+      } else {
+        daysHtml = `<pre style="white-space: pre-wrap; font-family: inherit; font-size: 0.875rem; line-height: 1.6;">${typeof trip.itinerary === 'string' ? trip.itinerary : JSON.stringify(trip.itinerary, null, 2)}</pre>`;
+      }
+
+      content.innerHTML = `
+        <div style="margin-bottom: 1.5rem;">
+          <span style="font-size: 0.8125rem; font-weight: 600; color: var(--primary); text-transform: uppercase;">Saved Itinerary</span>
+          <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--secondary);">${trip.destination} (${trip.duration})</h2>
+          <p style="color: var(--text-muted); font-size: 0.875rem;">Budget: ${trip.budget} · Travelers: ${trip.people || 2}</p>
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+          ${daysHtml}
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+          <button onclick="window.print()" class="btn btn-secondary">Print 🖨️</button>
+          <button onclick="closeTripModal()" class="btn btn-primary">Done</button>
+        </div>
+      `;
+
+      modal.style.display = 'flex';
+    }
+
+    function closeTripModal() {
+      document.getElementById('trip-modal').style.display = 'none';
+    }
+
+    async function deleteTrip(tripId) {
+      if (!confirm('Are you sure you want to delete this trip itinerary?')) return;
+      try {
+        const res = await fetch(`/api/trips?trip_id=${tripId}`, { method: 'DELETE' });
+        if (res.ok) {
+          App.toast('Trip deleted.', 'info');
+          const user = Auth.getCurrentUser();
+          loadTrips(user);
+        }
+      } catch (e) {
+        App.toast('Failed to delete trip.', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

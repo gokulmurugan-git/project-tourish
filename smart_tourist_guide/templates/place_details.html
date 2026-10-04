@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Place Details - Smart Tourist Guide</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="/" class="brand-logo">
+        <div class="brand-icon">🧭</div>
+        <span>Smart Tourist Guide</span>
+      </a>
+
+      <button class="nav-toggle-btn" aria-label="Toggle Navigation">☰</button>
+
+      <ul class="nav-menu">
+        <li><a href="/explore" class="nav-link">← Back to Explore</a></li>
+        <li><a href="/map" class="nav-link">Live Map</a></li>
+        <li><a href="/trip-planner" class="nav-link">AI Planner</a></li>
+        <li><a href="/ai-assistant" class="nav-link">AI Assistant</a></li>
+        <li><a href="/emergency" class="nav-link" style="color: #dc2626; font-weight: 600;">Emergency 🚨</a></li>
+      </ul>
+
+      <div class="nav-actions" id="nav-auth-actions"></div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container" id="place-details-container">
+      <div style="text-align: center; padding: 4rem 1rem;">
+        <div style="display: inline-block; width: 36px; height: 36px; border: 3px solid var(--border-light); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+        <p style="margin-top: 1rem; color: var(--text-muted);">Loading destination details...</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 Smart Tourist Guide. All rights reserved.</div>
+        <div style="color: #64748b;">Visiting hours and entry tickets are subject to local site regulation.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const pathParts = window.location.pathname.split('/');
+      const placeId = pathParts[pathParts.length - 1];
+
+      if (!placeId) {
+        window.location.href = '/explore';
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/places?id=${placeId}`);
+        const data = await res.json();
+        const place = data.place;
+
+        if (!place) {
+          document.getElementById('place-details-container').innerHTML = `
+            <div style="text-align: center; padding: 4rem 1rem;">
+              <h2>Attraction Not Found</h2>
+              <p style="color: var(--text-muted); margin: 0.5rem 0 1.5rem;">The requested place could not be located in our directory.</p>
+              <a href="/explore" class="btn btn-primary">Return to Explore</a>
+            </div>
+          `;
+          return;
+        }
+
+        let distText = '';
+        if (App.userLocation && place.latitude && place.longitude) {
+          const d = App.calculateDistance(App.userLocation.lat, App.userLocation.lng, place.latitude, place.longitude);
+          if (d) distText = `${d} km away from your location`;
+        }
+
+        const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`;
+
+        document.title = `${place.name} - Smart Tourist Guide`;
+
+        // Render Page
+        document.getElementById('place-details-container').innerHTML = `
+          <!-- Hero Header Image -->
+          <div style="position: relative;">
+            <img src="${place.image_url}" alt="${place.name}" class="place-hero-img">
+            <button class="card-favorite-btn" data-fav-id="${place.place_id}" onclick="App.toggleFavorite('${place.place_id}', event)" style="position: absolute; top: 1.5rem; right: 1.5rem; width: 44px; height: 44px; font-size: 1.35rem;">
+              🤍
+            </button>
+          </div>
+
+          <div class="details-grid">
+            <!-- Left: Description, Timings, Reviews -->
+            <div>
+              <div style="margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                  <span style="font-weight: 600; font-size: 0.8125rem; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em;">${place.category}</span>
+                  <span style="color: var(--text-muted);">·</span>
+                  <span style="font-weight: 700; color: #b45309;">★ ${place.rating ? place.rating.toFixed(1) : '4.8'} (${place.review_count || 120}+ reviews)</span>
+                </div>
+                <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--secondary); margin-bottom: 0.5rem; line-height: 1.2;">${place.name}</h1>
+                <p style="font-size: 1rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem;">
+                  📍 ${place.location}
+                  ${distText ? `<span style="color: var(--primary); font-weight: 600;">(📍 ${distText})</span>` : ''}
+                </p>
+              </div>
+
+              <!-- About description -->
+              <div class="details-card">
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.875rem;">About this Destination</h3>
+                <p style="color: var(--secondary); line-height: 1.7; font-size: 1rem; margin-bottom: 1rem;">${place.description}</p>
+                ${place.highlights ? `
+                  <div style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border-light);">
+                    <h4 style="font-size: 0.9375rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.5rem;">Key Highlights</h4>
+                    <p style="color: var(--text-muted); font-size: 0.9375rem; line-height: 1.6;">${place.highlights}</p>
+                  </div>
+                ` : ''}
+              </div>
+
+              <!-- Practical Info Card -->
+              <div class="details-card">
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--secondary); margin-bottom: 1rem;">Visitor Information</h3>
+                <div class="info-row">
+                  <span style="width: 140px; color: var(--text-muted); font-weight: 500;">Opening Hours:</span>
+                  <span style="font-weight: 600; color: var(--secondary);">${place.opening_time || '06:00 AM'} to ${place.closing_time || '08:00 PM'}</span>
+                </div>
+                <div class="info-row">
+                  <span style="width: 140px; color: var(--text-muted); font-weight: 500;">Best Time to Visit:</span>
+                  <span style="font-weight: 600; color: var(--secondary);">${place.best_time || 'Morning & Sunset'}</span>
+                </div>
+                <div class="info-row">
+                  <span style="width: 140px; color: var(--text-muted); font-weight: 500;">Entry Guidelines:</span>
+                  <span style="color: var(--secondary);">${place.ticket_info || 'Modest clothing recommended; verify camera fees at counter'}</span>
+                </div>
+              </div>
+
+              <!-- Reviews Section -->
+              <div class="details-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                  <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--secondary);">Tourist Reviews</h3>
+                  <button onclick="document.getElementById('review-form-box').scrollIntoView({behavior:'smooth'})" class="btn btn-sm btn-secondary">Write a Review ✍️</button>
+                </div>
+                <div id="place-reviews-list">
+                  <!-- Reviews populated below -->
+                </div>
+
+                <div id="review-form-box" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-light);">
+                  <h4 style="font-size: 1rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.75rem;">Leave Your Experience</h4>
+                  <form id="submit-review-form">
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                      <div style="flex: 1;">
+                        <label class="form-label" style="font-size: 0.8125rem;">Your Rating</label>
+                        <select id="review-rating" class="form-control">
+                          <option value="5">★★★★★ (5/5 Exceptional)</option>
+                          <option value="4" selected>★★★★☆ (4/5 Great)</option>
+                          <option value="3">★★★☆☆ (3/5 Good)</option>
+                          <option value="2">★★☆☆☆ (2/5 Fair)</option>
+                          <option value="1">★☆☆☆☆ (1/5 Poor)</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" style="font-size: 0.8125rem;">Your Feedback & Tips</label>
+                      <textarea id="review-comment" class="form-control" rows="3" placeholder="Share tips for fellow travelers (e.g., shoe counters, photography permissions, crowd timings)..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-primary">Post Review</button>
+                  </form>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Right Sidebar: Interactive Mini-Map & Nearby Amenities -->
+            <div>
+              <!-- Navigation & Action Card -->
+              <div class="details-card" style="position: sticky; top: 90px;">
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 1rem;">Location & Navigation</h3>
+                <div id="place-mini-map" style="height: 220px; border-radius: var(--radius-lg); margin-bottom: 1.25rem; border: 1px solid var(--border-light);"></div>
+                
+                <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="width: 100%; margin-bottom: 0.75rem;">
+                  Get Directions (Navigation) ↗
+                </a>
+
+                <button onclick="App.toggleFavorite('${place.place_id}', event)" class="btn btn-secondary" style="width: 100%; margin-bottom: 1.5rem;">
+                  Save to My Favorites ❤️
+                </button>
+
+                <!-- Nearby Restaurants -->
+                <div style="border-top: 1px solid var(--border-light); padding-top: 1.25rem; margin-bottom: 1.25rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <h4 style="font-size: 0.9375rem; font-weight: 700; color: var(--secondary);">Nearby Restaurants</h4>
+                    <a href="/restaurants" style="font-size: 0.75rem; color: var(--primary); font-weight: 600;">View All</a>
+                  </div>
+                  <div id="nearby-restaurants-box">
+                    <p style="font-size: 0.8125rem; color: var(--text-muted);">Finding local eateries...</p>
+                  </div>
+                </div>
+
+                <!-- Nearby Hotels -->
+                <div style="border-top: 1px solid var(--border-light); padding-top: 1.25rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <h4 style="font-size: 0.9375rem; font-weight: 700; color: var(--secondary);">Nearby Hotels</h4>
+                    <a href="/hotels" style="font-size: 0.75rem; color: var(--primary); font-weight: 600;">View All</a>
+                  </div>
+                  <div id="nearby-hotels-box">
+                    <p style="font-size: 0.8125rem; color: var(--text-muted);">Finding accommodation options...</p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Check if place is already favorite
+        const user = Auth.getCurrentUser();
+        if (user) {
+          try {
+            const favRes = await fetch(`/api/favorites?user_id=${user.user_id}`);
+            const favData = await favRes.json();
+            if (favData.favorites && favData.favorites.some(f => f.place_id === place.place_id)) {
+              const favBtn = document.querySelector(`[data-fav-id="${place.place_id}"]`);
+              if (favBtn) {
+                favBtn.classList.add('favorited');
+                favBtn.innerHTML = '❤️';
+              }
+            }
+          } catch (e) {}
+        }
+
+        // Initialize mini Leaflet map
+        if (place.latitude && place.longitude) {
+          const miniMap = L.map('place-mini-map').setView([place.latitude, place.longitude], 15);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+          }).addTo(miniMap);
+          L.marker([place.latitude, place.longitude]).addTo(miniMap).bindPopup(place.name).openPopup();
+        }
+
+        // Load reviews
+        loadPlaceReviews(place.place_id);
+
+        // Load nearby restaurants and hotels
+        loadNearbyAmenities(place.latitude, place.longitude);
+
+        // Setup review submit listener
+        document.getElementById('submit-review-form').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const currentUser = Auth.requireAuth();
+          if (!currentUser) return;
+
+          const rating = parseInt(document.getElementById('review-rating').value);
+          const comment = document.getElementById('review-comment').value.trim();
+
+          try {
+            const rRes = await fetch('/api/reviews', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                place_id: place.place_id,
+                user_id: currentUser.user_id,
+                user_name: currentUser.name,
+                rating,
+                comment
+              })
+            });
+
+            if (rRes.ok) {
+              App.toast('Review posted! Thank you.', 'success');
+              document.getElementById('review-comment').value = '';
+              loadPlaceReviews(place.place_id);
+            }
+          } catch (err) {
+            App.toast('Could not post review.', 'error');
+          }
+        });
+
+      } catch (err) {
+        document.getElementById('place-details-container').innerHTML = `<p style="padding: 2rem;">Error loading place.</p>`;
+      }
+    });
+
+    async function loadPlaceReviews(placeId) {
+      const box = document.getElementById('place-reviews-list');
+      if (!box) return;
+      try {
+        const res = await fetch(`/api/reviews?place_id=${placeId}`);
+        const data = await res.json();
+        const reviews = data.reviews || [];
+
+        if (reviews.length === 0) {
+          box.innerHTML = `<p style="font-size: 0.875rem; color: var(--text-muted); padding: 0.5rem 0;">No reviews yet. Be the first to share your experience!</p>`;
+          return;
+        }
+
+        box.innerHTML = reviews.map(r => `
+          <div style="padding: 1rem 0; border-bottom: 1px solid var(--border-subtle);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+              <span style="font-weight: 600; font-size: 0.9375rem; color: var(--secondary);">${r.user_name || 'Traveler'}</span>
+              <span style="color: #b45309; font-size: 0.8125rem; font-weight: 700;">★ ${r.rating} / 5</span>
+            </div>
+            <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.5;">${r.comment}</p>
+            <span style="font-size: 0.75rem; color: #94a3b8;">${r.created_at || 'Recently posted'}</span>
+          </div>
+        `).join('');
+      } catch (e) {
+        box.innerHTML = `<p style="font-size: 0.875rem; color: var(--text-muted);">Could not load reviews.</p>`;
+      }
+    }
+
+    async function loadNearbyAmenities(lat, lng) {
+      if (!lat || !lng) return;
+      try {
+        const [rRes, hRes] = await Promise.all([
+          fetch(`/api/restaurants?limit=3`).then(r => r.json()),
+          fetch(`/api/hotels?limit=3`).then(r => r.json())
+        ]);
+
+        const rBox = document.getElementById('nearby-restaurants-box');
+        if (rBox && rRes.restaurants) {
+          rBox.innerHTML = rRes.restaurants.slice(0, 2).map(r => `
+            <div style="margin-bottom: 0.625rem; font-size: 0.8125rem;">
+              <div style="font-weight: 600; color: var(--secondary);">${r.name}</div>
+              <div style="color: var(--text-muted);">${r.cuisine} · ★ ${r.rating} · ${r.price_range}</div>
+            </div>
+          `).join('');
+        }
+
+        const hBox = document.getElementById('nearby-hotels-box');
+        if (hBox && hRes.hotels) {
+          hBox.innerHTML = hRes.hotels.slice(0, 2).map(h => `
+            <div style="margin-bottom: 0.625rem; font-size: 0.8125rem;">
+              <div style="font-weight: 600; color: var(--secondary);">${h.name}</div>
+              <div style="color: var(--text-muted);">${h.rating}★ · ${h.price_range}</div>
+            </div>
+          `).join('');
+        }
+      } catch (e) {}
+    }
+  </script>
+</body>
+</html>

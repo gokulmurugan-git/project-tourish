@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Favorite Places - Smart Tourist Guide</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="/" class="brand-logo">
+        <div class="brand-icon">🧭</div>
+        <span>Smart Tourist Guide</span>
+      </a>
+
+      <button class="nav-toggle-btn" aria-label="Toggle Navigation">☰</button>
+
+      <ul class="nav-menu">
+        <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+        <li><a href="/explore" class="nav-link">Explore</a></li>
+        <li><a href="/map" class="nav-link">Map</a></li>
+        <li><a href="/trip-planner" class="nav-link">AI Planner</a></li>
+        <li><a href="/favorites" class="nav-link active">Favorites</a></li>
+        <li><a href="/my-trips" class="nav-link">My Trips</a></li>
+        <li><a href="/emergency" class="nav-link" style="color: #dc2626; font-weight: 600;">Emergency 🚨</a></li>
+      </ul>
+
+      <div class="nav-actions" id="nav-auth-actions"></div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+
+      <div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <div class="section-kicker">Saved Bucket List</div>
+          <h1 class="section-title" style="font-size: 2.25rem;">My Favorite Places</h1>
+          <p class="section-subtitle">Attractions and landmarks you've bookmarked for your upcoming journeys.</p>
+        </div>
+        <a href="/explore" class="btn btn-secondary">Explore More Spots →</a>
+      </div>
+
+      <div class="cards-grid" id="favorites-grid">
+        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem;">
+          <p style="color: var(--text-muted);">Loading your saved places...</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 Smart Tourist Guide. All rights reserved.</div>
+        <div style="color: #64748b;">Saved places are securely tied to your tourist profile in Firestore.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = Auth.requireAuth();
+      if (!user) return;
+
+      loadFavorites(user);
+    });
+
+    async function loadFavorites(user) {
+      const container = document.getElementById('favorites-grid');
+      try {
+        const res = await fetch(`/api/favorites?user_id=${user.user_id}`);
+        const data = await res.json();
+        const favs = data.favorites || [];
+
+        if (favs.length === 0) {
+          container.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 4.5rem 1.5rem; background: white; border-radius: var(--radius-xl); border: 1px dashed var(--border-light);">
+              <div style="font-size: 3rem; margin-bottom: 0.75rem;">🤍</div>
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--secondary);">No favorites saved yet</h3>
+              <p style="color: var(--text-muted); font-size: 0.9375rem; margin: 0.5rem 0 1.5rem;">Explore attractions across Tamil Nadu & India and tap the heart icon to save them here.</p>
+              <a href="/explore" class="btn btn-primary">Start Exploring Attractions</a>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = favs.map(f => `
+          <div class="place-card">
+            <div class="card-media">
+              <img src="${f.image_url || 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?auto=format&fit=crop&w=800&q=80'}" alt="${f.place_name}">
+              <button class="card-favorite-btn favorited" onclick="removeFavorite('${f.place_id}', event)" title="Remove from Favorites">
+                ❤️
+              </button>
+            </div>
+            <div class="card-body">
+              <div class="card-meta">
+                <span style="font-weight: 600; color: var(--primary); font-size: 0.75rem;">${f.category || 'Attraction'}</span>
+                <span>·</span>
+                <span class="card-rating">★ ${f.rating ? f.rating.toFixed(1) : '4.8'}</span>
+              </div>
+              <h3 class="card-title">❤️ ${f.place_name}</h3>
+              <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.5rem;">📍 ${f.location || 'Local area'}</p>
+              <p class="card-desc">${f.description || 'Saved attraction in your favorites.'}</p>
+              <div class="card-footer">
+                <button onclick="removeFavorite('${f.place_id}', event)" class="btn btn-sm btn-danger" style="font-size: 0.75rem;">
+                  Remove ✕
+                </button>
+                <a href="/place/${f.place_id}" class="btn btn-sm btn-primary">View Details</a>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (e) {
+        container.innerHTML = `<p style="padding: 2rem;">Could not load favorites.</p>`;
+      }
+    }
+
+    async function removeFavorite(placeId, e) {
+      if (e) e.stopPropagation();
+      const user = Auth.getCurrentUser();
+      if (!user) return;
+
+      try {
+        await fetch('/api/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ place_id: placeId, user_id: user.user_id })
+        });
+        App.toast('Removed from favorites', 'info');
+        loadFavorites(user);
+      } catch (err) {
+        App.toast('Could not remove favorite', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

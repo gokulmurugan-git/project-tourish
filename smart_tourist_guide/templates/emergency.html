@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency Assistance - Smart Tourist Guide</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="/" class="brand-logo">
+        <div class="brand-icon">🧭</div>
+        <span>Smart Tourist Guide</span>
+      </a>
+
+      <button class="nav-toggle-btn" aria-label="Toggle Navigation">☰</button>
+
+      <ul class="nav-menu">
+        <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+        <li><a href="/explore" class="nav-link">Explore</a></li>
+        <li><a href="/map" class="nav-link">Map</a></li>
+        <li><a href="/emergency" class="nav-link active" style="color: #dc2626; font-weight: 700;">Emergency 🚨</a></li>
+      </ul>
+
+      <div class="nav-actions" id="nav-auth-actions"></div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+
+      <!-- Critical Banner -->
+      <div class="emergency-banner">
+        <div style="display: flex; gap: 1rem; align-items: flex-start;">
+          <span style="font-size: 2rem;">🚨</span>
+          <div>
+            <h1 style="font-size: 1.875rem; font-weight: 800; margin-bottom: 0.375rem;">Immediate Emergency Assistance</h1>
+            <p style="font-size: 1rem; opacity: 0.95; line-height: 1.5;">
+              If you are facing an urgent threat, medical emergency, or accident, dial official verified emergency services immediately.
+            </p>
+            <div style="margin-top: 0.75rem; padding: 0.625rem 1rem; background: rgba(0,0,0,0.2); border-radius: var(--radius-md); font-size: 0.8125rem;">
+              ⚠️ <b>Verification Notice:</b> Emergency hotlines shown below are national/state public services. In remote areas, please cross-verify with local hotel front desks or airport assistance counters.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- National Verified Emergency Numbers -->
+      <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--secondary); margin-bottom: 1rem;">
+        National Emergency Hotlines (Toll-Free 24/7)
+      </h2>
+
+      <div class="emergency-hotlines-grid">
+        <div class="hotline-card">
+          <span style="font-size: 0.8125rem; font-weight: 700; color: #dc2626; text-transform: uppercase;">All-in-One Emergency</span>
+          <div class="hotline-number">112</div>
+          <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">Unified National Emergency Response System (Police, Fire, Medical)</p>
+          <a href="tel:112" class="btn btn-sm btn-danger" style="width: 100%;">Call 112 Now 📞</a>
+        </div>
+
+        <div class="hotline-card">
+          <span style="font-size: 0.8125rem; font-weight: 700; color: #dc2626; text-transform: uppercase;">Medical & Ambulance</span>
+          <div class="hotline-number">108</div>
+          <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">Emergency Ambulance Service & Medical First Responders</p>
+          <a href="tel:108" class="btn btn-sm btn-danger" style="width: 100%;">Call 108 (Ambulance) 🚑</a>
+        </div>
+
+        <div class="hotline-card">
+          <span style="font-size: 0.8125rem; font-weight: 700; color: #dc2626; text-transform: uppercase;">Tourist Helpline</span>
+          <div class="hotline-number">1363</div>
+          <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">Ministry of Tourism Multi-lingual 24x7 Infoline (English, Hindi, etc.)</p>
+          <a href="tel:1363" class="btn btn-sm btn-danger" style="width: 100%;">Call 1363 (Tourist Help) 🧭</a>
+        </div>
+
+        <div class="hotline-card">
+          <span style="font-size: 0.8125rem; font-weight: 700; color: #dc2626; text-transform: uppercase;">Women Helpline</span>
+          <div class="hotline-number">1091</div>
+          <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">Women Safety & Protection Emergency Cell</p>
+          <a href="tel:1091" class="btn btn-sm btn-danger" style="width: 100%;">Call 1091 🛡️</a>
+        </div>
+      </div>
+
+      <!-- Nearby Facilities Sections -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 3rem;">
+        
+        <!-- Nearby Hospitals -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--secondary);">🏥 Nearby Hospitals</h3>
+            <button onclick="App.requestLocation(() => loadEmergencyServices())" class="btn btn-sm btn-secondary">Update GPS 📍</button>
+          </div>
+          <div id="hospitals-list" style="display: flex; flex-direction: column; gap: 1rem;">
+            <p style="color: var(--text-muted);">Finding 24/7 hospitals...</p>
+          </div>
+        </div>
+
+        <!-- Nearby Police Stations -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--secondary);">🚓 Nearby Police Stations</h3>
+            <button onclick="App.requestLocation(() => loadEmergencyServices())" class="btn btn-sm btn-secondary">Update GPS 📍</button>
+          </div>
+          <div id="police-list" style="display: flex; flex-direction: column; gap: 1rem;">
+            <p style="color: var(--text-muted);">Finding local police stations...</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 Smart Tourist Guide Safety Services.</div>
+        <div style="color: #64748b;">Emergency hotlines are maintained according to Government of India public safety standards.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadEmergencyServices();
+    });
+
+    async function loadEmergencyServices() {
+      try {
+        const res = await fetch('/api/emergency');
+        const data = await res.json();
+
+        // Render Hospitals
+        const hospContainer = document.getElementById('hospitals-list');
+        const hospitals = data.hospitals || [];
+
+        hospContainer.innerHTML = hospitals.map(h => {
+          let distText = '';
+          if (App.userLocation && h.latitude && h.longitude) {
+            const d = App.calculateDistance(App.userLocation.lat, App.userLocation.lng, h.latitude, h.longitude);
+            if (d) distText = `${d} km away`;
+          }
+
+          const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${h.latitude},${h.longitude}`;
+
+          return `
+            <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 1.25rem; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                <div>
+                  <h4 style="font-size: 1.0625rem; font-weight: 700; color: var(--secondary);">${h.name}</h4>
+                  <p style="font-size: 0.8125rem; color: var(--text-muted);">📍 ${h.location}</p>
+                </div>
+                ${distText ? `<span style="font-size: 0.75rem; font-weight: 700; color: #dc2626; background: #fee2e2; padding: 2px 8px; border-radius: 4px;">${distText}</span>` : ''}
+              </div>
+              <div style="font-size: 0.8125rem; color: var(--secondary); margin-bottom: 1rem;">
+                Emergency Line: <b>${h.phone}</b> · 24/7 Casualty & Trauma Center
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <a href="tel:${h.phone.replace(/[^0-9+]/g, '')}" class="btn btn-sm btn-danger" style="flex: 1;">Call Hospital 📞</a>
+                <a href="${dirUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary">Directions ↗</a>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Render Police Stations
+        const polContainer = document.getElementById('police-list');
+        const stations = data.police_stations || [];
+
+        polContainer.innerHTML = stations.map(p => {
+          let distText = '';
+          if (App.userLocation && p.latitude && p.longitude) {
+            const d = App.calculateDistance(App.userLocation.lat, App.userLocation.lng, p.latitude, p.longitude);
+            if (d) distText = `${d} km away`;
+          }
+
+          const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${p.latitude},${p.longitude}`;
+
+          return `
+            <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 1.25rem; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                <div>
+                  <h4 style="font-size: 1.0625rem; font-weight: 700; color: var(--secondary);">${p.name}</h4>
+                  <p style="font-size: 0.8125rem; color: var(--text-muted);">📍 ${p.location}</p>
+                </div>
+                ${distText ? `<span style="font-size: 0.75rem; font-weight: 700; color: #4338ca; background: #e0e7ff; padding: 2px 8px; border-radius: 4px;">${distText}</span>` : ''}
+              </div>
+              <div style="font-size: 0.8125rem; color: var(--secondary); margin-bottom: 1rem;">
+                Station Desk: <b>${p.phone}</b> · Tourist Police Desk Available
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <a href="tel:${p.phone.replace(/[^0-9+]/g, '')}" class="btn btn-sm btn-primary" style="flex: 1;">Call Station 📞</a>
+                <a href="${dirUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary">Directions ↗</a>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (e) {
+        console.warn('Emergency services load error', e);
+      }
+    }
+  </script>
+</body>
+</html>

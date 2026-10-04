@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Trip Planner - Smart Tourist Guide</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="/" class="brand-logo">
+        <div class="brand-icon">🧭</div>
+        <span>Smart Tourist Guide</span>
+      </a>
+
+      <button class="nav-toggle-btn" aria-label="Toggle Navigation">☰</button>
+
+      <ul class="nav-menu">
+        <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+        <li><a href="/explore" class="nav-link">Explore</a></li>
+        <li><a href="/map" class="nav-link">Map</a></li>
+        <li><a href="/trip-planner" class="nav-link active">AI Trip Planner</a></li>
+        <li><a href="/ai-assistant" class="nav-link">AI Assistant</a></li>
+        <li><a href="/my-trips" class="nav-link">My Trips</a></li>
+        <li><a href="/emergency" class="nav-link" style="color: #dc2626; font-weight: 600;">Emergency 🚨</a></li>
+      </ul>
+
+      <div class="nav-actions" id="nav-auth-actions"></div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+
+      <div style="margin-bottom: 2.5rem;">
+        <div class="section-kicker">Gemini AI Trip Synthesizer</div>
+        <h1 class="section-title" style="font-size: 2.25rem;">Personalized Trip Planner</h1>
+        <p class="section-subtitle">
+          Configure your travel constraints and let AI curate a logical, time-optimized day-by-day itinerary complete with local dining and authentic spots.
+        </p>
+      </div>
+
+      <div class="planner-layout">
+        
+        <!-- Input Form Card -->
+        <div class="planner-form-card">
+          <div style="display: flex; align-items: center; gap: 0.625rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-light);">
+            <span style="font-size: 1.5rem;">⚙️</span>
+            <div>
+              <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--secondary);">Trip Parameters</h3>
+              <p style="font-size: 0.75rem; color: var(--text-muted);">Adjust to your ideal travel style</p>
+            </div>
+          </div>
+
+          <form id="trip-planner-form">
+            <div class="form-group">
+              <label class="form-label" for="trip-destination">Destination City / Region</label>
+              <input type="text" id="trip-destination" class="form-control" placeholder="e.g., Madurai, Ooty, Chennai, Kanyakumari" value="Madurai" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label" for="trip-days">Days</label>
+                <select id="trip-days" class="form-control">
+                  <option value="1">1 Day Express</option>
+                  <option value="2" selected>2 Days Weekend</option>
+                  <option value="3">3 Days Standard</option>
+                  <option value="4">4 Days Extended</option>
+                  <option value="5">5 Days Leisure</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="trip-people">Travelers</label>
+                <select id="trip-people" class="form-control">
+                  <option value="1">Solo (1)</option>
+                  <option value="2" selected>Couple (2)</option>
+                  <option value="4">Family / Group (4)</option>
+                  <option value="6">Large Group (6+)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="trip-budget">Estimated Budget (Optional)</label>
+              <input type="text" id="trip-budget" class="form-control" placeholder="e.g., ₹5,000 per person" value="₹5,000">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="trip-style">Travel Pace & Style</label>
+              <select id="trip-style" class="form-control">
+                <option value="Balanced & Cultural" selected>Balanced & Cultural (Moderate Pace)</option>
+                <option value="Budget Explorer">Budget Explorer (Affordable Local Focus)</option>
+                <option value="Relaxed & Leisure">Relaxed & Leisure (Gentle Sightseeing)</option>
+                <option value="High Energy">High Energy (Cover Maximum Sights)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Interests (Select multiple)</label>
+              <div class="checkbox-grid">
+                <label class="checkbox-label">
+                  <input type="checkbox" name="interests" value="History" checked> History & Temples
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" name="interests" value="Food" checked> Local Food & Sweets
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" name="interests" value="Culture" checked> Heritage & Culture
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" name="interests" value="Nature"> Nature & Parks
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" name="interests" value="Shopping"> Traditional Shopping
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" name="interests" value="Adventure"> Outdoor Activities
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" id="generate-trip-btn" class="btn btn-primary" style="width: 100%; padding: 0.875rem; margin-top: 0.75rem;">
+              Generate My Trip ⚡
+            </button>
+          </form>
+        </div>
+
+        <!-- Itinerary Display Output Area -->
+        <div>
+          <div id="itinerary-output">
+            <!-- Initial Empty State -->
+            <div id="itinerary-empty-state" style="text-align: center; padding: 4.5rem 2rem; background: white; border-radius: var(--radius-xl); border: 1px dashed var(--border-light);">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">🗓️</div>
+              <h3 style="font-size: 1.35rem; font-weight: 700; color: var(--secondary);">Ready to Craft Your Custom Itinerary</h3>
+              <p style="color: var(--text-muted); max-width: 440px; margin: 0.5rem auto 1.5rem; line-height: 1.6;">
+                Fill in your destination, days, and travel interests on the left, then click <b>Generate My Trip</b>. Gemini AI will tailor a complete schedule for you.
+              </p>
+              <button onclick="document.getElementById('trip-planner-form').dispatchEvent(new Event('submit'))" class="btn btn-secondary">
+                Generate Demo Trip for Madurai 🚀
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom Actions (Save Trip) -->
+          <div id="itinerary-actions" style="display: none; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-light);">
+            <button id="save-trip-btn" class="btn btn-primary">
+              Save Trip to My Account 💾
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 Smart Tourist Guide. All rights reserved.</div>
+        <div style="color: #64748b;">Itineraries are AI-generated suggestions. Verify opening hours and tickets locally.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/planner.js"></script>
+</body>
+</html>

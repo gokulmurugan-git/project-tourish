@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotels & Accommodations - Smart Tourist Guide</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="/" class="brand-logo">
+        <div class="brand-icon">🧭</div>
+        <span>Smart Tourist Guide</span>
+      </a>
+
+      <button class="nav-toggle-btn" aria-label="Toggle Navigation">☰</button>
+
+      <ul class="nav-menu">
+        <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+        <li><a href="/explore" class="nav-link">Explore</a></li>
+        <li><a href="/map" class="nav-link">Map</a></li>
+        <li><a href="/trip-planner" class="nav-link">AI Planner</a></li>
+        <li><a href="/hotels" class="nav-link active">Hotels</a></li>
+        <li><a href="/restaurants" class="nav-link">Restaurants</a></li>
+        <li><a href="/emergency" class="nav-link" style="color: #dc2626; font-weight: 600;">Emergency 🚨</a></li>
+      </ul>
+
+      <div class="nav-actions" id="nav-auth-actions"></div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+
+      <!-- Header & Filters -->
+      <div style="margin-bottom: 2rem;">
+        <div class="section-kicker">Comfortable Stays</div>
+        <h1 class="section-title" style="font-size: 2.25rem;">Hotels & Accommodations</h1>
+        <p class="section-subtitle">
+          Verified heritage resorts, boutique hotels, and budget-friendly stays near key attractions.
+        </p>
+
+        <!-- Filter Controls -->
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+          <input type="text" id="hotel-search" class="form-control" placeholder="Search hotels by name or area..." style="flex: 1; min-width: 260px;">
+
+          <select id="hotel-budget-filter" class="form-control" style="width: 180px;">
+            <option value="all">All Budgets</option>
+            <option value="budget">Budget (Under ₹2,500)</option>
+            <option value="mid">Mid-Range (₹2,500 - ₹6,000)</option>
+            <option value="luxury">Luxury (₹6,000+)</option>
+          </select>
+
+          <select id="hotel-sort" class="form-control" style="width: 170px;">
+            <option value="rating">Top Rated ★</option>
+            <option value="name">Name A-Z</option>
+          </select>
+
+          <button onclick="App.requestLocation(() => HotelsPage.render())" class="btn btn-secondary">
+            📍 Near Me
+          </button>
+        </div>
+      </div>
+
+      <!-- Hotels Grid -->
+      <div class="cards-grid" id="hotels-grid">
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+          <p style="color: var(--text-muted);">Finding vetted accommodations...</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Hotel Details Modal -->
+  <div id="hotel-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; padding: 1.5rem; backdrop-filter: blur(4px);">
+    <div style="background: white; border-radius: var(--radius-xl); max-width: 580px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-xl); padding: 2rem; position: relative;">
+      <button onclick="HotelsPage.closeModal()" style="position: absolute; top: 1.25rem; right: 1.25rem; background: var(--bg-card-alt); border: none; width: 34px; height: 34px; border-radius: 50%; font-size: 1.1rem; cursor: pointer;">✕</button>
+      <div id="hotel-modal-content"></div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 Smart Tourist Guide. All rights reserved.</div>
+        <div style="color: #64748b;">Direct verified contact details provided. We do not charge booking fees.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script>
+    const HotelsPage = {
+      hotels: [],
+
+      async init() {
+        try {
+          const res = await fetch('/api/hotels');
+          const data = await res.json();
+          this.hotels = data.hotels || [];
+          this.setupListeners();
+          this.render();
+        } catch (e) {
+          document.getElementById('hotels-grid').innerHTML = `<p style="padding: 2rem;">Could not load hotels.</p>`;
+        }
+      },
+
+      setupListeners() {
+        document.getElementById('hotel-search').addEventListener('input', () => this.render());
+        document.getElementById('hotel-budget-filter').addEventListener('change', () => this.render());
+        document.getElementById('hotel-sort').addEventListener('change', () => this.render());
+      },
+
+      render() {
+        const query = document.getElementById('hotel-search').value.toLowerCase().trim();
+        const budget = document.getElementById('hotel-budget-filter').value;
+        const sort = document.getElementById('hotel-sort').value;
+
+        let filtered = this.hotels.filter(h => {
+          const matchesQuery = !query || h.name.toLowerCase().includes(query) || (h.location && h.location.toLowerCase().includes(query));
+          let matchesBudget = true;
+          if (budget === 'budget') matchesBudget = h.price_range.includes('₹1') || h.price_range.includes('₹2');
+          if (budget === 'mid') matchesBudget = h.price_range.includes('₹3') || h.price_range.includes('₹4') || h.price_range.includes('₹5');
+          if (budget === 'luxury') matchesBudget = h.price_range.includes('₹6') || h.price_range.includes('₹7') || h.price_range.includes('₹8') || h.price_range.includes('₹10');
+          return matchesQuery && matchesBudget;
+        });
+
+        if (sort === 'rating') {
+          filtered.sort((a, b) => b.rating - a.rating);
+        } else if (sort === 'name') {
+          filtered.sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        const container = document.getElementById('hotels-grid');
+        if (filtered.length === 0) {
+          container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 3rem; background: white; border-radius: var(--radius-lg);">No accommodations match your filter.</div>`;
+          return;
+        }
+
+        container.innerHTML = filtered.map(h => {
+          let distText = '';
+          if (App.userLocation && h.latitude && h.longitude) {
+            const d = App.calculateDistance(App.userLocation.lat, App.userLocation.lng, h.latitude, h.longitude);
+            if (d) distText = `${d} km away`;
+          }
+
+          return `
+            <div class="place-card">
+              <div class="card-media">
+                <img src="${h.image_url}" alt="${h.name}">
+              </div>
+              <div class="card-body">
+                <div class="card-meta">
+                  <span style="font-weight: 700; color: #059669; font-size: 0.8125rem;">${h.price_range}</span>
+                  <span>·</span>
+                  <span class="card-rating">★ ${h.rating.toFixed(1)}</span>
+                </div>
+                <h3 class="card-title">${h.name}</h3>
+                <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.5rem;">📍 ${h.location}</p>
+                <p class="card-desc" style="-webkit-line-clamp: 2;">Facilities: ${(h.facilities || []).join(', ')}</p>
+                <div class="card-footer">
+                  <span class="card-distance">${distText || 'Verified Stay'}</span>
+                  <button onclick="HotelsPage.viewDetails('${h.hotel_id}')" class="btn btn-sm btn-primary">View Hotel Details</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
+
+      viewDetails(id) {
+        const hotel = this.hotels.find(h => h.hotel_id === id);
+        if (!hotel) return;
+
+        const modal = document.getElementById('hotel-modal');
+        const content = document.getElementById('hotel-modal-content');
+
+        content.innerHTML = `
+          <div style="margin-bottom: 1.25rem;">
+            <img src="${hotel.image_url}" alt="${hotel.name}" style="width: 100%; height: 240px; object-fit: cover; border-radius: var(--radius-lg); margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--secondary);">${hotel.name}</h2>
+                <p style="color: var(--text-muted); font-size: 0.875rem;">📍 ${hotel.location}</p>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 1.15rem; font-weight: 700; color: #059669;">${hotel.price_range}</div>
+                <div style="font-size: 0.8125rem; color: #b45309; font-weight: 600;">★ ${hotel.rating.toFixed(1)} Rating</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 1.5rem;">
+            <h4 style="font-size: 0.9375rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.5rem;">Key Amenities & Facilities</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+              ${(hotel.facilities || []).map(f => `<span style="background: var(--bg-card-alt); padding: 4px 10px; border-radius: var(--radius-sm); font-size: 0.8125rem; color: var(--secondary);">${f}</span>`).join('')}
+            </div>
+          </div>
+
+          <div style="background: var(--bg-page); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.5rem;">
+            <div style="font-size: 0.8125rem; font-weight: 600; color: var(--secondary); margin-bottom: 0.25rem;">Contact & Reservations:</div>
+            <div style="font-size: 0.875rem; color: var(--text-muted);">📞 ${hotel.phone || '+91 452 234 5678'} · ✉️ reservations@${hotel.name.toLowerCase().replace(/[^a-z]/g, '')}.com</div>
+            <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">Note: For authentic pricing and room availability, contact the front desk directly or visit their official reception.</div>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem;">
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${hotel.latitude},${hotel.longitude}" target="_blank" class="btn btn-primary" style="flex: 1;">
+              Get Directions (Map) ↗
+            </a>
+            <button onclick="HotelsPage.closeModal()" class="btn btn-secondary">Close</button>
+          </div>
+        `;
+
+        modal.style.display = 'flex';
+      },
+
+      closeModal() {
+        document.getElementById('hotel-modal').style.display = 'none';
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => HotelsPage.init());
+  </script>
+</body>
+</html>

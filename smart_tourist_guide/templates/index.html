@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Tourist Guide - Explore More. Travel Smarter.</title>
+  <meta name="description" content="Your AI-powered travel companion for discovering places, planning trips and exploring destinations.">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="/" class="brand-logo">
+        <div class="brand-icon">🧭</div>
+        <span>Smart Tourist Guide</span>
+      </a>
+
+      <button class="nav-toggle-btn" aria-label="Toggle Navigation">☰</button>
+
+      <ul class="nav-menu">
+        <li><a href="/explore" class="nav-link">Explore</a></li>
+        <li><a href="/map" class="nav-link">Map</a></li>
+        <li><a href="/trip-planner" class="nav-link">AI Trip Planner</a></li>
+        <li><a href="/ai-assistant" class="nav-link">AI Assistant</a></li>
+        <li><a href="/hotels" class="nav-link">Hotels</a></li>
+        <li><a href="/restaurants" class="nav-link">Restaurants</a></li>
+        <li><a href="/events" class="nav-link">Events</a></li>
+        <li><a href="/emergency" class="nav-link" style="color: #dc2626; font-weight: 600;">Emergency 🚨</a></li>
+      </ul>
+
+      <div class="nav-actions" id="nav-auth-actions">
+        <a href="/login" class="btn btn-sm btn-secondary">Log In</a>
+        <a href="/register" class="btn btn-sm btn-primary">Sign Up</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-content">
+          <div class="hero-kicker">
+            <span>✨</span> Next-Generation Tourism Experience
+          </div>
+          <h1 class="hero-title">Explore More.<br>Travel Smarter.</h1>
+          <p class="hero-subtitle">
+            Your AI-powered travel companion for discovering places, planning trips and exploring destinations with real-time location insights.
+          </p>
+          <div class="hero-cta">
+            <a href="/explore" class="btn btn-lg btn-primary">Explore Destinations</a>
+            <a href="/trip-planner" class="btn btn-lg btn-secondary">Plan My Trip ⚡</a>
+          </div>
+
+          <div class="hero-stats">
+            <div>
+              <div class="hero-stat-val">500+</div>
+              <div class="hero-stat-label">Verified Attractions</div>
+            </div>
+            <div>
+              <div class="hero-stat-val">Instant</div>
+              <div class="hero-stat-label">AI Itinerary Generation</div>
+            </div>
+            <div>
+              <div class="hero-stat-val">24 / 7</div>
+              <div class="hero-stat-label">Safety & Local Assistance</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="hero-img-card">
+            <img src="https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1200&q=80" alt="Meenakshi Temple Madurai">
+          </div>
+          <div class="hero-floating-card">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+              🤖
+            </div>
+            <div>
+              <div style="font-size: 0.8125rem; font-weight: 700; color: var(--secondary);">AI Assistant Ready</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Ask anything about Tamil Nadu & beyond</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Travel Categories -->
+  <section style="padding: 4rem 0; background: white; border-bottom: 1px solid var(--border-light);">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Find Your Vibe</div>
+          <h2 class="section-title">Popular Travel Categories</h2>
+        </div>
+        <a href="/explore" class="btn btn-sm btn-secondary">View All</a>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1.25rem;">
+        <a href="/explore?category=Historical" style="background: var(--bg-card-alt); border-radius: var(--radius-lg); padding: 1.5rem 1rem; text-align: center; border: 1px solid var(--border-light); transition: all 0.2s ease;">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏛️</div>
+          <div style="font-weight: 600; font-size: 0.875rem;">Historical</div>
+        </a>
+        <a href="/explore?category=Nature" style="background: var(--bg-card-alt); border-radius: var(--radius-lg); padding: 1.5rem 1rem; text-align: center; border: 1px solid var(--border-light); transition: all 0.2s ease;">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌲</div>
+          <div style="font-weight: 600; font-size: 0.875rem;">Nature</div>
+        </a>
+        <a href="/explore?category=Beach" style="background: var(--bg-card-alt); border-radius: var(--radius-lg); padding: 1.5rem 1rem; text-align: center; border: 1px solid var(--border-light); transition: all 0.2s ease;">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏖️</div>
+          <div style="font-weight: 600; font-size: 0.875rem;">Beach</div>
+        </a>
+        <a href="/explore?category=Religious" style="background: var(--bg-card-alt); border-radius: var(--radius-lg); padding: 1.5rem 1rem; text-align: center; border: 1px solid var(--border-light); transition: all 0.2s ease;">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">🛕</div>
+          <div style="font-weight: 600; font-size: 0.875rem;">Religious</div>
+        </a>
+        <a href="/explore?category=Food" style="background: var(--bg-card-alt); border-radius: var(--radius-lg); padding: 1.5rem 1rem; text-align: center; border: 1px solid var(--border-light); transition: all 0.2s ease;">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">🍲</div>
+          <div style="font-weight: 600; font-size: 0.875rem;">Food & Cuisine</div>
+        </a>
+        <a href="/explore?category=Adventure" style="background: var(--bg-card-alt); border-radius: var(--radius-lg); padding: 1.5rem 1rem; text-align: center; border: 1px solid var(--border-light); transition: all 0.2s ease;">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">🧗</div>
+          <div style="font-weight: 600; font-size: 0.875rem;">Adventure</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popular Destinations Grid -->
+  <section style="padding: 4.5rem 0;">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Handpicked Places</div>
+          <h2 class="section-title">Recommended Tourist Highlights</h2>
+          <p class="section-subtitle">Top-rated historical temples, serene hill stations, and vibrant cultural landmarks.</p>
+        </div>
+        <a href="/explore" class="btn btn-secondary">Discover More Places →</a>
+      </div>
+
+      <div class="cards-grid" id="home-featured-grid">
+        <!-- Rendered by main script -->
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section style="padding: 5rem 0; background: white; border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light);">
+    <div class="container">
+      <div style="text-align: center; max-width: 600px; margin: 0 auto 3.5rem;">
+        <div class="section-kicker">Simple & Seamless</div>
+        <h2 class="section-title">How Smart Tourist Guide Works</h2>
+        <p class="section-subtitle">Three intuitive steps to elevate your travel journey from inspiration to smooth exploration.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+        <div style="padding: 2rem; background: var(--bg-page); border-radius: var(--radius-xl); border: 1px solid var(--border-light);">
+          <div style="font-size: 1.75rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem;">01</div>
+          <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.5rem;">Share Your Preferences</h3>
+          <p style="color: var(--text-muted); font-size: 0.9375rem; line-height: 1.6;">
+            Select your destination, days, budget, interests, and preferred pace. Real-time location allows nearby discovery with one tap.
+          </p>
+        </div>
+        <div style="padding: 2rem; background: var(--bg-page); border-radius: var(--radius-xl); border: 1px solid var(--border-light);">
+          <div style="font-size: 1.75rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem;">02</div>
+          <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.5rem;">Instant AI Itinerary</h3>
+          <p style="color: var(--text-muted); font-size: 0.9375rem; line-height: 1.6;">
+            Powered by Google Gemini AI, receive a logically routed day-by-day plan with dining stops, optimal visiting hours, and local tips.
+          </p>
+        </div>
+        <div style="padding: 2rem; background: var(--bg-page); border-radius: var(--radius-xl); border: 1px solid var(--border-light);">
+          <div style="font-size: 1.75rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem;">03</div>
+          <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.5rem;">Navigate & Explore Safely</h3>
+          <p style="color: var(--text-muted); font-size: 0.9375rem; line-height: 1.6;">
+            Use interactive maps, get turn-by-turn routing, find vetted restaurants & hotels, and access emergency hospital/police hotlines instantly.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI Assistant Showcase -->
+  <section style="padding: 5rem 0;">
+    <div class="container">
+      <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border-radius: var(--radius-xl); padding: 3.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
+        <div>
+          <div style="display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #38bdf8; margin-bottom: 0.75rem;">
+            ⚡ Powered by Gemini AI
+          </div>
+          <h2 style="font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 1rem;">
+            Meet Your 24/7 AI Tourist Guide
+          </h2>
+          <p style="color: #94a3b8; font-size: 1.0625rem; line-height: 1.6; margin-bottom: 2rem;">
+            Ask questions in natural language. Wondering what to visit in Madurai for one day? Need the best vegetarian feast recommendations? Our assistant delivers clear, practical, reliable guidance.
+          </p>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="/ai-assistant" class="btn btn-lg btn-primary">Start Chatting Now</a>
+            <a href="/trip-planner" class="btn btn-lg btn-secondary">Generate Itinerary</a>
+          </div>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-lg); padding: 1.5rem; backdrop-filter: blur(8px);">
+          <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #38bdf8; color: #0f172a; display: flex; align-items: center; justify-content: center; font-size: 0.875rem;">U</div>
+            <div style="background: rgba(255, 255, 255, 0.1); padding: 0.625rem 1rem; border-radius: var(--radius-md); font-size: 0.875rem;">
+              "What can I visit in Madurai for one day?"
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.75rem;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #0284c7; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.875rem;">🧭</div>
+            <div style="background: rgba(255, 255, 255, 0.15); padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: 0.875rem; line-height: 1.5;">
+              Start early at the historic <b>Meenakshi Amman Temple</b> (6:30 AM). For breakfast, savor soft idlis at Murugan Idli Shop. Head to the 17th-century <b>Thirumalai Nayakkar Palace</b> by 11:00 AM, and finish with evening shopping at Puthu Mandapam!
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Safety & Emergency Section -->
+  <section style="padding: 4rem 0; background: #fff5f5; border-top: 1px solid #fee2e2;">
+    <div class="container">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+        <div>
+          <span style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; color: #dc2626; letter-spacing: 0.08em;">Emergency Assistance</span>
+          <h2 style="font-size: 1.75rem; font-weight: 800; color: #7f1d1d; margin-top: 0.25rem;">Travel With Total Peace of Mind</h2>
+          <p style="color: #991b1b; font-size: 0.9375rem; margin-top: 0.25rem;">
+            Instant access to verified local police stations, 24/7 hospitals, ambulance services, and official national tourist helplines.
+          </p>
+        </div>
+        <a href="/emergency" class="btn btn-lg btn-danger" style="background: #dc2626; color: white; border: none;">Open Emergency Hub 🚨</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="brand-logo" style="color: white; margin-bottom: 1rem;">
+            <div class="brand-icon">🧭</div>
+            <span>Smart Tourist Guide</span>
+          </div>
+          <p style="font-size: 0.875rem; line-height: 1.6; max-width: 320px; color: #94a3b8;">
+            A real-time, modern, responsive tourism assistance platform integrating Gemini AI, interactive maps, and localized emergency services.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Explore</h4>
+          <ul class="footer-links">
+            <li><a href="/explore">All Destinations</a></li>
+            <li><a href="/map">Interactive Map</a></li>
+            <li><a href="/hotels">Hotels & Stays</a></li>
+            <li><a href="/restaurants">Local Cuisine</a></li>
+            <li><a href="/events">Upcoming Events</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-title">AI Planning</h4>
+          <ul class="footer-links">
+            <li><a href="/trip-planner">AI Itinerary Generator</a></li>
+            <li><a href="/ai-assistant">24/7 Tourist Chatbot</a></li>
+            <li><a href="/dashboard">User Dashboard</a></li>
+            <li><a href="/my-trips">Saved Trips</a></li>
+            <li><a href="/favorites">Favorite Places</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Support & Safety</h4>
+          <ul class="footer-links">
+            <li><a href="/emergency" style="color: #f87171;">Emergency Hotlines</a></li>
+            <li><a href="/login">User Account</a></li>
+            <li><a href="/admin">Admin Portal</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 Smart Tourist Guide. All rights reserved. “Explore More. Travel Smarter.”</div>
+        <div style="color: #64748b;">Built with HTML5, CSS3, Vanilla JS, Flask & Gemini AI</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script>
+    // Load home featured places
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const res = await fetch('/api/places?limit=6');
+        const data = await res.json();
+        const container = document.getElementById('home-featured-grid');
+        if (!container || !data.places) return;
+
+        container.innerHTML = data.places.slice(0, 6).map(p => `
+          <div class="place-card">
+            <div class="card-media">
+              <img src="${p.image_url}" alt="${p.name}">
+              <button class="card-favorite-btn" data-fav-id="${p.place_id}" onclick="App.toggleFavorite('${p.place_id}', event)">🤍</button>
+            </div>
+            <div class="card-body">
+              <div class="card-meta">
+                <span style="font-weight: 600; color: var(--primary); font-size: 0.75rem; text-transform: uppercase;">${p.category}</span>
+                <span>·</span>
+                <span class="card-rating">★ ${p.rating.toFixed(1)}</span>
+              </div>
+              <h3 class="card-title">${p.name}</h3>
+              <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.5rem;">📍 ${p.location}</p>
+              <p class="card-desc">${p.description}</p>
+              <div class="card-footer">
+                <span class="card-distance">🕒 ${p.opening_time} - ${p.closing_time}</span>
+                <a href="/place/${p.place_id}" class="btn btn-sm btn-primary">View Details</a>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.warn('Home highlights load error', e);
+      }
+    });
+  </script>
+</body>
+</html>

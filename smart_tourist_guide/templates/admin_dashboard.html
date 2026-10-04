@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal - Smart Tourist Guide</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="/" class="brand-logo">
+        <div class="brand-icon">🧭</div>
+        <span>Smart Tourist Guide <small style="font-size: 0.65rem; background: var(--secondary); color: white; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">ADMIN</small></span>
+      </a>
+
+      <button class="nav-toggle-btn" aria-label="Toggle Navigation">☰</button>
+
+      <ul class="nav-menu">
+        <li><a href="/dashboard" class="nav-link">User Dashboard</a></li>
+        <li><a href="/explore" class="nav-link">Explore</a></li>
+        <li><a href="/map" class="nav-link">Map</a></li>
+        <li><a href="/admin" class="nav-link active">Admin Portal</a></li>
+      </ul>
+
+      <div class="nav-actions" id="nav-auth-actions"></div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+
+      <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <span style="font-size: 0.8125rem; font-weight: 700; color: #d97706; text-transform: uppercase;">Management Console</span>
+          <h1 class="section-title" style="font-size: 2.25rem;">Administrator Dashboard</h1>
+          <p class="section-subtitle">Manage tourist attractions, dining, accommodations, seasonal events, and traveler reviews.</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button onclick="Admin.openAddPlaceModal()" class="btn btn-primary">+ Add New Attraction</button>
+        </div>
+      </div>
+
+      <!-- Admin Tabs -->
+      <div class="filter-tabs" style="margin-bottom: 2rem;">
+        <button class="filter-tab admin-tab active" data-tab="places">🏛️ Tourist Places</button>
+        <button class="filter-tab admin-tab" data-tab="restaurants">🍽️ Restaurants</button>
+        <button class="filter-tab admin-tab" data-tab="hotels">🏨 Hotels</button>
+        <button class="filter-tab admin-tab" data-tab="events">🎉 Events</button>
+        <button class="filter-tab admin-tab" data-tab="reviews">💬 Reviews Moderation</button>
+        <button class="filter-tab admin-tab" data-tab="alerts">📢 Tourism Alerts</button>
+      </div>
+
+      <!-- Tab Content: Places -->
+      <div id="admin-places-tab" class="admin-tab-pane">
+        <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-sm);">
+          <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--secondary);">Directory of Tourist Attractions</h3>
+            <span id="admin-places-count" style="font-size: 0.8125rem; color: var(--text-muted);">Loading...</span>
+          </div>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem;">
+              <thead style="background: var(--bg-card-alt); border-bottom: 1px solid var(--border-light); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                <tr>
+                  <th style="padding: 0.875rem 1.25rem;">Name</th>
+                  <th style="padding: 0.875rem 1.25rem;">Category</th>
+                  <th style="padding: 0.875rem 1.25rem;">Location</th>
+                  <th style="padding: 0.875rem 1.25rem;">Rating</th>
+                  <th style="padding: 0.875rem 1.25rem; text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-places-tbody">
+                <!-- Populated via script -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content: Reviews Moderation -->
+      <div id="admin-reviews-tab" class="admin-tab-pane" style="display: none;">
+        <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-xl); padding: 1.5rem; box-shadow: var(--shadow-sm);">
+          <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 1rem;">Community Reviews</h3>
+          <div id="admin-reviews-list">
+            <p style="color: var(--text-muted);">Loading reviews...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content: Tourism Alerts Broadcast -->
+      <div id="admin-alerts-tab" class="admin-tab-pane" style="display: none;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+          <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-xl); padding: 1.75rem; box-shadow: var(--shadow-sm);">
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 1rem;">Broadcast Tourism Advisory</h3>
+            <form id="admin-alert-form">
+              <div class="form-group">
+                <label class="form-label">Alert Headline</label>
+                <input type="text" id="alert-title" class="form-control" placeholder="e.g. Monsoon Hill Road Advisory" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Severity Level</label>
+                <select id="alert-severity" class="form-control">
+                  <option value="info">Information (Blue)</option>
+                  <option value="warning" selected>Warning / Weather (Amber)</option>
+                  <option value="urgent">Urgent / Safety (Red)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Advisory Message</label>
+                <textarea id="alert-message" class="form-control" rows="3" placeholder="Provide details, affected areas, and official guidance..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%;">Post Public Alert 📢</button>
+            </form>
+          </div>
+
+          <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-xl); padding: 1.75rem; box-shadow: var(--shadow-sm);">
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 1rem;">Active Advisories</h3>
+            <div id="admin-active-alerts">
+              <!-- Rendered via script -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Add Place Modal -->
+  <div id="add-place-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; padding: 1.5rem; backdrop-filter: blur(4px);">
+    <div style="background: white; border-radius: var(--radius-xl); max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-xl); padding: 2rem; position: relative;">
+      <button onclick="Admin.closeAddPlaceModal()" style="position: absolute; top: 1.25rem; right: 1.25rem; background: var(--bg-card-alt); border: none; width: 34px; height: 34px; border-radius: 50%; font-size: 1.1rem; cursor: pointer;">✕</button>
+      <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--secondary); margin-bottom: 1rem;">Add New Tourist Attraction</h2>
+      
+      <form id="add-place-form">
+        <div class="form-group">
+          <label class="form-label">Attraction Name</label>
+          <input type="text" id="new-place-name" class="form-control" placeholder="e.g. Thirumalai Nayakkar Mahal" required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select id="new-place-category" class="form-control">
+              <option value="Historical">Historical</option>
+              <option value="Religious">Religious</option>
+              <option value="Nature">Nature</option>
+              <option value="Beach">Beach</option>
+              <option value="Adventure">Adventure</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Culture">Culture</option>
+              <option value="Entertainment">Entertainment</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location / City</label>
+            <input type="text" id="new-place-location" class="form-control" placeholder="Madurai, Tamil Nadu" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Latitude</label>
+            <input type="number" step="any" id="new-place-lat" class="form-control" placeholder="9.9195" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Longitude</label>
+            <input type="number" step="any" id="new-place-lng" class="form-control" placeholder="78.1194" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Image URL (Unsplash or verified link)</label>
+          <input type="url" id="new-place-image" class="form-control" placeholder="https://images.unsplash.com/..." required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="new-place-desc" class="form-control" rows="3" placeholder="Provide accurate tourist summary..." required></textarea>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">Save Attraction</button>
+          <button type="button" onclick="Admin.closeAddPlaceModal()" class="btn btn-secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 Smart Tourist Guide Admin. Role-based authorization active.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script>
+    const Admin = {
+      places: [],
+
+      async init() {
+        // Enforce RBAC
+        const user = Auth.requireAdmin();
+        if (!user) return;
+
+        this.setupTabs();
+        await this.loadPlaces();
+        await this.loadReviews();
+        await this.loadAlerts();
+        this.setupAlertForm();
+        this.setupAddPlaceForm();
+      },
+
+      setupTabs() {
+        const tabs = document.querySelectorAll('.admin-tab');
+        tabs.forEach(tab => {
+          tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const target = tab.dataset.tab;
+            
+            document.querySelectorAll('.admin-tab-pane').forEach(p => p.style.display = 'none');
+            const targetPane = document.getElementById(`admin-${target}-tab`);
+            if (targetPane) targetPane.style.display = 'block';
+          });
+        });
+      },
+
+      async loadPlaces() {
+        try {
+          const res = await fetch('/api/places');
+          const data = await res.json();
+          this.places = data.places || [];
+
+          document.getElementById('admin-places-count').textContent = `${this.places.length} active attractions`;
+
+          const tbody = document.getElementById('admin-places-tbody');
+          tbody.innerHTML = this.places.map(p => `
+            <tr style="border-bottom: 1px solid var(--border-subtle);">
+              <td style="padding: 1rem 1.25rem;">
+                <div style="font-weight: 600; color: var(--secondary);">${p.name}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">${p.place_id}</div>
+              </td>
+              <td style="padding: 1rem 1.25rem;">
+                <span style="font-size: 0.75rem; font-weight: 600; color: var(--primary);">${p.category}</span>
+              </td>
+              <td style="padding: 1rem 1.25rem; color: var(--text-muted);">${p.location}</td>
+              <td style="padding: 1rem 1.25rem; font-weight: 600; color: #b45309;">★ ${p.rating.toFixed(1)}</td>
+              <td style="padding: 1rem 1.25rem; text-align: right;">
+                <a href="/place/${p.place_id}" target="_blank" class="btn btn-sm btn-secondary" style="font-size: 0.75rem;">View</a>
+                <button onclick="Admin.deletePlace('${p.place_id}')" class="btn btn-sm btn-danger" style="font-size: 0.75rem; margin-left: 0.25rem;">Delete</button>
+              </td>
+            </tr>
+          `).join('');
+        } catch (e) {
+          console.warn(e);
+        }
+      },
+
+      async deletePlace(placeId) {
+        if (!confirm('Are you sure you want to delete this tourist place?')) return;
+        try {
+          const res = await fetch(`/api/places?id=${placeId}`, { method: 'DELETE' });
+          if (res.ok) {
+            App.toast('Place deleted from database.', 'info');
+            this.loadPlaces();
+          }
+        } catch (e) {
+          App.toast('Failed to delete place.', 'error');
+        }
+      },
+
+      openAddPlaceModal() {
+        document.getElementById('add-place-modal').style.display = 'flex';
+      },
+
+      closeAddPlaceModal() {
+        document.getElementById('add-place-modal').style.display = 'none';
+      },
+
+      setupAddPlaceForm() {
+        const form = document.getElementById('add-place-form');
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const newPlace = {
+            place_id: 'place_' + Date.now(),
+            name: document.getElementById('new-place-name').value.trim(),
+            category: document.getElementById('new-place-category').value,
+            location: document.getElementById('new-place-location').value.trim(),
+            latitude: parseFloat(document.getElementById('new-place-lat').value),
+            longitude: parseFloat(document.getElementById('new-place-lng').value),
+            image_url: document.getElementById('new-place-image').value.trim(),
+            description: document.getElementById('new-place-desc').value.trim(),
+            rating: 4.8,
+            opening_time: '08:00 AM',
+            closing_time: '07:00 PM'
+          };
+
+          try {
+            const res = await fetch('/api/places', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(newPlace)
+            });
+            if (res.ok) {
+              App.toast('New attraction added successfully!', 'success');
+              this.closeAddPlaceModal();
+              form.reset();
+              this.loadPlaces();
+            }
+          } catch (e) {
+            App.toast('Failed to save attraction', 'error');
+          }
+        });
+      },
+
+      async loadReviews() {
+        const container = document.getElementById('admin-reviews-list');
+        try {
+          const res = await fetch('/api/reviews');
+          const data = await res.json();
+          const reviews = data.reviews || [];
+
+          if (reviews.length === 0) {
+            container.innerHTML = `<p style="color: var(--text-muted);">No reviews submitted yet.</p>`;
+            return;
+          }
+
+          container.innerHTML = reviews.map(r => `
+            <div style="padding: 1rem 0; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <div style="font-weight: 600; font-size: 0.9375rem; color: var(--secondary);">${r.user_name || 'Traveler'} · <span style="color: #b45309;">★ ${r.rating}</span></div>
+                <p style="font-size: 0.875rem; color: var(--text-muted); margin: 0.25rem 0;">${r.comment}</p>
+                <div style="font-size: 0.75rem; color: #94a3b8;">Place ID: ${r.place_id} · ${r.created_at || 'Recent'}</div>
+              </div>
+              <button onclick="Admin.deleteReview('${r.review_id}')" class="btn btn-sm btn-danger" style="font-size: 0.75rem;">
+                Remove Review 🗑️
+              </button>
+            </div>
+          `).join('');
+        } catch (e) {
+          container.innerHTML = `<p style="color: var(--text-muted);">Could not load reviews.</p>`;
+        }
+      },
+
+      async deleteReview(reviewId) {
+        if (!confirm('Remove this review from public display?')) return;
+        try {
+          const res = await fetch(`/api/reviews?id=${reviewId}`, { method: 'DELETE' });
+          if (res.ok) {
+            App.toast('Review removed.', 'info');
+            this.loadReviews();
+          }
+        } catch (e) {
+          App.toast('Failed to remove review.', 'error');
+        }
+      },
+
+      async loadAlerts() {
+        const container = document.getElementById('admin-active-alerts');
+        try {
+          const res = await fetch('/api/alerts');
+          const data = await res.json();
+          const alerts = data.alerts || [];
+
+          if (alerts.length === 0) {
+            container.innerHTML = `<p style="color: var(--text-muted);">No active tourism alerts.</p>`;
+            return;
+          }
+
+          container.innerHTML = alerts.map(a => `
+            <div style="padding: 1rem; border-radius: var(--radius-md); background: ${a.severity === 'urgent' ? '#fee2e2' : '#fef3c7'}; margin-bottom: 0.75rem;">
+              <h4 style="font-size: 0.9375rem; font-weight: 700; color: #991b1b;">${a.title}</h4>
+              <p style="font-size: 0.8125rem; color: #7f1d1d; margin: 0.25rem 0 0.5rem;">${a.message}</p>
+              <span style="font-size: 0.75rem; color: #991b1b;">Posted: ${a.created_at || 'Today'}</span>
+            </div>
+          `).join('');
+        } catch (e) {
+          container.innerHTML = `<p style="color: var(--text-muted);">Could not load alerts.</p>`;
+        }
+      },
+
+      setupAlertForm() {
+        const form = document.getElementById('admin-alert-form');
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const title = document.getElementById('alert-title').value.trim();
+          const severity = document.getElementById('alert-severity').value;
+          const message = document.getElementById('alert-message').value.trim();
+
+          try {
+            const res = await fetch('/api/alerts', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ title, severity, message })
+            });
+
+            if (res.ok) {
+              App.toast('Tourism alert broadcasted!', 'success');
+              form.reset();
+              this.loadAlerts();
+            }
+          } catch (e) {
+            App.toast('Failed to broadcast alert', 'error');
+          }
+        });
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => Admin.init());
+  </script>
+</body>
+</html>
